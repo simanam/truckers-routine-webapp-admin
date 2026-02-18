@@ -1,0 +1,147 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Brand Colors */
+  --color-navy: #31407F;
+  --color-navy-dark: #1C2342;
+  --color-navy-light: #3A4EA3;
+  --color-orange: #FF670E;
+  --color-orange-light: #FFE6D7;
+  --color-cream: #FFFDEE;
+  --color-lavender: #DDDFEE;
+  --color-warm-gray: #55544F;
+
+  /* Status Colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Category Colors */
+  --color-category-nutrition: #4CAF50;
+  --color-category-exercise: #4CAF50;
+  --color-category-hygiene: #2196F3;
+  --color-category-hydration: #2196F3;
+  --color-category-mental-health: #9C27B0;
+  --color-category-sleep: #3F51B5;
+  --color-category-safety: #F44336;
+  --color-category-stress: #00BCD4;
+  --color-category-social: #FF9800;
+  --color-category-cabin: #795548;
+}
+
+:root {
+  --radius: 0.75rem;
+
+  /* Brand-mapped shadcn variables */
+  --background: #ffffff;
+  --foreground: #1C2342;
+
+  --card: #ffffff;
+  --card-foreground: #1C2342;
+
+  --popover: #ffffff;
+  --popover-foreground: #1C2342;
+
+  --primary: #31407F;
+  --primary-foreground: #FFFDEE;
+
+  --secondary: #DDDFEE;
+  --secondary-foreground: #31407F;
+
+  --muted: #DDDFEE;
+  --muted-foreground: #55544F;
+
+  --accent: #FF670E;
+  --accent-foreground: #ffffff;
+
+  --destructive: #ef4444;
+
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #31407F;
+
+  /* Sidebar */
+  --sidebar: #1C2342;
+  --sidebar-foreground: #FFFDEE;
+  --sidebar-primary: #FF670E;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #31407F;
+  --sidebar-accent-foreground: #FFFDEE;
+  --sidebar-border: #2a3566;
+  --sidebar-ring: #FF670E;
+
+  /* Chart colors */
+  --chart-1: #31407F;
+  --chart-2: #FF670E;
+  --chart-3: #10b981;
+  --chart-4: #f59e0b;
+  --chart-5: #8b5cf6;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
