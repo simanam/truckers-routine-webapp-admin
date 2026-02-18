@@ -265,74 +265,65 @@ At the top of the page, show stats from `useAlternativeStats()`:
 
 ### Layout
 
+Two-tab layout: **All Users** (default) and **Deleted Users**.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  User Management                                             │
+│  View all users, manage roles, and handle deleted accounts.  │
 ├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌─ Soft-Deleted Users ──────────────────────────────────┐  │
-│  │                                                        │  │
-│  │  Users who have been soft-deleted and can be           │  │
-│  │  restored or permanently removed.                      │  │
-│  │                                                        │  │
-│  ├──────────────────────┬──────────────┬─────────────────┤  │
-│  │ Email                │ Deleted At   │ Actions         │  │
-│  ├──────────────────────┼──────────────┼─────────────────┤  │
-│  │ user@example.com     │ Feb 15, 2026 │ [Restore] [🗑]  │  │
-│  │ old@example.com      │ Jan 20, 2026 │ [Restore] [🗑]  │  │
-│  └──────────────────────┴──────────────┴─────────────────┘  │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+│  [All Users]  [Deleted Users (3)]                            │
+├─────────────────────────────────────────────────────────────┤
+│  [🔍 Search by email...]              [Role ▾ All Roles]     │
+├──────────────┬──────────┬──────────┬─────────┬──────────────┤
+│ Email        │ Role     │ Tier     │ Joined  │ Actions      │
+├──────────────┼──────────┼──────────┼─────────┼──────────────┤
+│ user@ex.com  │ User     │ Free     │ Jan 5   │ [Promote]    │
+│ admin@ex.com │ Admin    │ Pro      │ Feb 1   │ [Demote]     │
+│ super@ex.com │ Super    │ Free     │ Dec 20  │ —            │
+└──────────────┴──────────┴──────────┴─────────┴──────────────┘
 ```
 
-### Column Definitions
+### Data Source
+
+Uses `useSearchUsers(params)` hook hitting `GET /admin/users/search` with query params:
+- `email` — partial match search
+- `role` — filter by role (user/admin/super_admin)
+- `limit`, `offset` — pagination
+
+API returns `{ users: [...], total, limit, offset }` wrapper format.
+
+### All Users Tab — Column Definitions
+
+| Column | Key | Renderer |
+|--------|-----|----------|
+| Email | `email` | Font-medium text |
+| Role | `role` | Badge (amber for super_admin, blue for admin, gray for user) |
+| Tier | `tier` | Outlined badge (gray for free, green for pro, purple for enterprise) |
+| Joined | `created_at` | Formatted date |
+| Actions | — | Promote/Demote buttons (super_admin only, not for self or other super_admins) |
+
+### Deleted Users Tab
 
 | Column | Key | Renderer |
 |--------|-----|----------|
 | Email | `email` | Text |
-| Deleted At | `deleted_at` | Formatted date (`format(date, "MMM d, yyyy")`) |
+| Deleted At | `deleted_at` | Formatted date |
 | Actions | — | Restore button + Hard Delete button |
 
 ### Actions
 
-#### Restore User
-```typescript
-const restoreUser = useRestoreUser();
+- **Promote** (super_admin only): `usePromoteUser()` — `POST /admin/users/{id}/promote`
+- **Demote** (super_admin only): `useDemoteUser()` — `POST /admin/users/{id}/demote`
+- **Restore**: `useRestoreUser()` — `POST /admin/users/restore/{id}`
+- **Hard Delete**: `useHardDeleteUser()` — `DELETE /admin/users/hard-delete/{id}?confirm=true` (requires ConfirmDialog)
 
-const handleRestore = (userId: string) => {
-  restoreUser.mutate(userId, {
-    onSuccess: () => toast.success("User restored"),
-    onError: (err) => toast.error(err.message),
-  });
-};
-```
-- Button: "Restore" with `RotateCcw` icon
-- No confirmation needed (non-destructive)
-
-#### Hard Delete User
-```typescript
-const hardDelete = useHardDeleteUser();
-
-const handleHardDelete = (userId: string) => {
-  hardDelete.mutate(userId, {
-    onSuccess: () => {
-      toast.success("User permanently deleted");
-      setShowConfirm(false);
-    },
-    onError: (err) => toast.error(err.message),
-  });
-};
-```
-- Button: Red trash icon
-- **Requires ConfirmDialog**: "Permanently delete this user? This action cannot be undone."
-- API call includes `?confirm=true` query param
-
-### Empty State
+### Empty State (Deleted Tab)
 
 If no soft-deleted users:
 ```
 ┌────────────────────────────────────────┐
-│         🎉 No deleted users            │
+│         No deleted users               │
 │   All users are active and healthy.    │
 └────────────────────────────────────────┘
 ```
@@ -590,7 +581,7 @@ Display from `useCorporateAnalytics(id)`:
 | `app/(dashboard)/workouts/page.tsx` | Daily generation controls |
 | `app/(dashboard)/workouts/alternatives/page.tsx` | Exercise alternatives list + CRUD |
 | `components/exercise-search-select.tsx` | Single exercise search/select combobox |
-| `app/(dashboard)/users/page.tsx` | Soft-deleted users management |
+| `app/(dashboard)/users/page.tsx` | All users (tabbed: All Users + Deleted Users) |
 | `app/(dashboard)/users/admins/page.tsx` | Admin roles + promote/demote |
 | `app/(dashboard)/corporate/page.tsx` | Corporate accounts list |
 | `app/(dashboard)/corporate/[id]/page.tsx` | Corporate account detail + users |
@@ -609,11 +600,13 @@ Display from `useCorporateAnalytics(id)`:
 - [ ] Edit/delete alternatives work
 - [ ] Bulk create parses JSON and submits
 - [ ] Alternative stats display at top
-- [ ] Soft-deleted users list loads
+- [ ] All Users tab loads with search and role filter
+- [ ] Promote/Demote actions work from All Users tab (super_admin only)
+- [ ] Deleted Users tab loads with soft-deleted users
 - [ ] Restore user works with success toast
 - [ ] Hard delete shows confirmation and requires confirm=true
 - [ ] Admin list shows all admins with roles
-- [ ] Promote user by ID works (super_admin only)
+- [ ] Promote user by email works (super_admin only)
 - [ ] Demote admin works with confirmation (super_admin only)
 - [ ] Transfer super admin shows warning and updates current user state
 - [ ] Non-super_admin users cannot see promote/demote/transfer buttons

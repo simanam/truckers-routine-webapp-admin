@@ -194,8 +194,10 @@ export interface ExerciseListParams {
 
 export interface ExerciseAlternative {
   id: string;
-  primary_exercise_id: string;
-  alternate_exercise_id: string;
+  primary_exercise_id?: string;
+  primary_exercise?: Exercise;
+  alternate_exercise_id?: string;
+  alternate_exercise?: Exercise;
   alternate_order: number;
   reason: string;
   created_at?: string;
@@ -360,6 +362,22 @@ export interface SoftDeletedUser {
   id: string;
   email: string;
   deleted_at: string;
+}
+
+export interface SearchUser {
+  id: string;
+  email: string;
+  role: "user" | "admin" | "super_admin";
+  tier: "free" | "pro" | "enterprise";
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface SearchUsersParams {
+  email?: string;
+  role?: string;
+  limit?: number;
+  offset?: number;
 }
 
 // ============================================================

@@ -50,7 +50,8 @@ import {
   useDeleteAlternative,
   useBulkCreateAlternatives,
 } from "@/lib/hooks/use-workouts";
-import type { ExerciseAlternative, AlternativeCreateRequest } from "@/lib/types";
+import { useExercises } from "@/lib/hooks/use-exercises";
+import type { ExerciseAlternative, AlternativeCreateRequest, Exercise } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -410,6 +411,18 @@ export default function AlternativesPage() {
   // Queries
   const { data: alternatives, isLoading } = useAlternatives();
   const { data: stats } = useAlternativeStats();
+  const { data: exercises } = useExercises({ limit: 500 });
+
+  // Build exercise name lookup
+  const exerciseMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (exercises) {
+      for (const ex of exercises) {
+        map.set(ex.id, ex.name);
+      }
+    }
+    return map;
+  }, [exercises]);
 
   // Mutations
   const deleteMutation = useDeleteAlternative();
@@ -420,12 +433,19 @@ export default function AlternativesPage() {
     if (!search) return alternatives;
 
     const lower = search.toLowerCase();
-    return alternatives.filter(
-      (a) =>
-        a.primary_exercise_id.toLowerCase().includes(lower) ||
-        a.alternate_exercise_id.toLowerCase().includes(lower) ||
-        a.reason.toLowerCase().includes(lower)
-    );
+    return alternatives.filter((a) => {
+      const primaryName = a.primary_exercise?.name
+        || (a.primary_exercise_id && exerciseMap.get(a.primary_exercise_id))
+        || "";
+      const altName = a.alternate_exercise?.name
+        || (a.alternate_exercise_id && exerciseMap.get(a.alternate_exercise_id))
+        || "";
+      return (
+        primaryName.toLowerCase().includes(lower) ||
+        altName.toLowerCase().includes(lower) ||
+        (a.reason || "").toLowerCase().includes(lower)
+      );
+    });
   }, [alternatives, search]);
 
   const paginatedData = useMemo(() => {
@@ -473,20 +493,30 @@ export default function AlternativesPage() {
     {
       key: "primary_exercise_id",
       header: "Primary Exercise",
-      cell: (row) => (
-        <span className="text-sm font-mono truncate max-w-[180px] inline-block">
-          {row.primary_exercise_id}
-        </span>
-      ),
+      cell: (row) => {
+        const name = row.primary_exercise?.name
+          || (row.primary_exercise_id ? exerciseMap.get(row.primary_exercise_id) : null);
+        const id = row.primary_exercise_id || row.primary_exercise?.id;
+        return (
+          <span className="text-sm truncate max-w-[220px] inline-block" title={id || ""}>
+            {name || id || "—"}
+          </span>
+        );
+      },
     },
     {
       key: "alternate_exercise_id",
       header: "Alternative Exercise",
-      cell: (row) => (
-        <span className="text-sm font-mono truncate max-w-[180px] inline-block">
-          {row.alternate_exercise_id}
-        </span>
-      ),
+      cell: (row) => {
+        const name = row.alternate_exercise?.name
+          || (row.alternate_exercise_id ? exerciseMap.get(row.alternate_exercise_id) : null);
+        const id = row.alternate_exercise_id || row.alternate_exercise?.id;
+        return (
+          <span className="text-sm truncate max-w-[220px] inline-block" title={id || ""}>
+            {name || id || "—"}
+          </span>
+        );
+      },
     },
     {
       key: "alternate_order",

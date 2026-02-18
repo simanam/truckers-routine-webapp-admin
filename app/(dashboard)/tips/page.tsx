@@ -354,14 +354,17 @@ export default function TipsPage() {
     {
       key: "tier",
       header: "Tier",
-      cell: (row) => (
-        <Badge
-          variant="secondary"
-          className={TIER_BADGE_COLORS[row.min_tier]}
-        >
-          {row.min_tier.charAt(0).toUpperCase() + row.min_tier.slice(1)}
-        </Badge>
-      ),
+      cell: (row) =>
+        row.min_tier ? (
+          <Badge
+            variant="secondary"
+            className={TIER_BADGE_COLORS[row.min_tier]}
+          >
+            {row.min_tier.charAt(0).toUpperCase() + row.min_tier.slice(1)}
+          </Badge>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
     },
     {
       key: "ai_generated",

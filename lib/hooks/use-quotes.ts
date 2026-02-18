@@ -29,7 +29,7 @@ function toArray<T>(data: unknown): T[] {
 export function useQuotes() {
   return useQuery({
     queryKey: quoteKeys.lists(),
-    queryFn: () => api.fetch<Quote[]>("/admin/quotes/quotes"),
+    queryFn: () => api.fetch<Quote[]>("/admin/quotes"),
     select: (data) => toArray<Quote>(data),
   });
 }
@@ -37,7 +37,7 @@ export function useQuotes() {
 export function useQuoteCategories() {
   return useQuery({
     queryKey: quoteKeys.categories(),
-    queryFn: () => api.fetch<string[]>("/admin/quotes/quotes/categories"),
+    queryFn: () => api.fetch<string[]>("/admin/quotes/categories"),
     select: (data) => toArray<string>(data),
   });
 }
@@ -49,7 +49,7 @@ export function useCreateQuote() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: QuoteCreateRequest) =>
-      api.fetch<Quote>("/admin/quotes/quotes", {
+      api.fetch<Quote>("/admin/quotes", {
         method: "POST",
         body: JSON.stringify(data),
       }),
@@ -64,8 +64,8 @@ export function useUpdateQuote() {
   return useMutation({
     mutationFn: (data: { id: string } & Partial<QuoteCreateRequest>) => {
       const { id, ...body } = data;
-      return api.fetch<Quote>(`/admin/quotes/quotes/${id}`, {
-        method: "PUT",
+      return api.fetch<Quote>(`/admin/quotes/${id}`, {
+        method: "PATCH",
         body: JSON.stringify(body),
       });
     },
@@ -79,7 +79,7 @@ export function useDeleteQuote() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) =>
-      api.fetch<void>(`/admin/quotes/quotes/${id}`, { method: "DELETE" }),
+      api.fetch<void>(`/admin/quotes/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: quoteKeys.all });
     },

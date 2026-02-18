@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Crown, Shield, UserMinus, ArrowRightLeft } from "lucide-react";
+import { Crown, Shield, UserMinus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 
 import {
   useAdmins,
+  useSearchUsers,
   usePromoteUser,
   useDemoteUser,
   useTransferSuperAdmin,
@@ -55,58 +56,67 @@ export default function AdminRolesPage() {
   const [demoteTarget, setDemoteTarget] = useState<AdminUser | null>(null);
   const [transferTarget, setTransferTarget] = useState<AdminUser | null>(null);
 
+  // Search for user by email to get their ID for promote
+  const { data: searchResults } = useSearchUsers(
+    promoteEmail.trim()
+      ? { email: promoteEmail.trim(), limit: 5 }
+      : { limit: 0 }
+  );
+
   // Handlers
   const handlePromote = () => {
-    if (!promoteEmail.trim()) return;
-    promoteMutation.mutate(
-      { email: promoteEmail.trim() },
-      {
-        onSuccess: () => {
-          toast.success(`${promoteEmail.trim()} promoted to admin`);
-          setPromoteEmail("");
-        },
-        onError: () => {
-          toast.error("Failed to promote user");
-        },
-      }
+    const email = promoteEmail.trim();
+    if (!email) return;
+
+    // Find user by email from search results
+    const match = searchResults?.find(
+      (u) => u.email.toLowerCase() === email.toLowerCase()
     );
+
+    if (!match) {
+      toast.error("User not found. Check the email address.");
+      return;
+    }
+
+    promoteMutation.mutate(match.id, {
+      onSuccess: () => {
+        toast.success(`${email} promoted to admin`);
+        setPromoteEmail("");
+      },
+      onError: () => {
+        toast.error("Failed to promote user");
+      },
+    });
   };
 
   const handleDemote = () => {
     if (!demoteTarget) return;
-    demoteMutation.mutate(
-      { email: demoteTarget.email },
-      {
-        onSuccess: () => {
-          toast.success(`${demoteTarget.email} demoted successfully`);
-          setDemoteTarget(null);
-        },
-        onError: () => {
-          toast.error("Failed to demote user");
-        },
-      }
-    );
+    demoteMutation.mutate(demoteTarget.user_id, {
+      onSuccess: () => {
+        toast.success(`${demoteTarget.email} demoted successfully`);
+        setDemoteTarget(null);
+      },
+      onError: () => {
+        toast.error("Failed to demote user");
+      },
+    });
   };
 
   const handleTransfer = () => {
     if (!transferTarget) return;
-    transferMutation.mutate(
-      { new_super_admin_email: transferTarget.email },
-      {
-        onSuccess: () => {
-          toast.success(
-            `Super admin role transferred to ${transferTarget.email}`
-          );
-          setTransferTarget(null);
-          // Force re-initialization to refresh current user state
-          useAuthStore.setState({ isInitialized: false });
-          useAuthStore.getState().initialize();
-        },
-        onError: () => {
-          toast.error("Failed to transfer super admin role");
-        },
-      }
-    );
+    transferMutation.mutate(transferTarget.user_id, {
+      onSuccess: () => {
+        toast.success(
+          `Super admin role transferred to ${transferTarget.email}`
+        );
+        setTransferTarget(null);
+        useAuthStore.setState({ isInitialized: false });
+        useAuthStore.getState().initialize();
+      },
+      onError: () => {
+        toast.error("Failed to transfer super admin role");
+      },
+    });
   };
 
   return (

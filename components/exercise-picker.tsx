@@ -7,7 +7,7 @@ import {
   Draggable,
   type DropResult,
 } from "@hello-pangea/dnd";
-import { GripVertical, Plus, Search, Trash2, Clock } from "lucide-react";
+import { Dumbbell, GripVertical, Plus, Search, Trash2, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
+import { getCloudinaryThumbnail } from "@/lib/cloudinary";
 import type { Exercise, ExerciseType } from "@/lib/types";
 
 export interface SelectedExercise {
@@ -35,6 +36,59 @@ export interface ExercisePickerProps {
   selected: SelectedExercise[];
   onChange: (exercises: SelectedExercise[]) => void;
   mode?: "blueprint" | "reset";
+}
+
+function ExerciseSearchItem({
+  exercise,
+  thumb,
+  alreadyAdded,
+  onAdd,
+}: {
+  exercise: Exercise;
+  thumb: string | null;
+  alreadyAdded: boolean;
+  onAdd: (exercise: Exercise) => void;
+}) {
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <div className="flex items-center justify-between border-b px-3 py-2 last:border-b-0">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        {thumb && !imgError ? (
+          <img
+            src={thumb}
+            alt={exercise.name}
+            className="h-10 w-14 shrink-0 rounded object-cover bg-muted"
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="flex h-10 w-14 shrink-0 items-center justify-center rounded bg-muted">
+            <Dumbbell className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{exercise.name}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {exercise.category}
+            {exercise.primary_muscles.length > 0 &&
+              ` - ${exercise.primary_muscles.join(", ")}`}
+          </p>
+        </div>
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => onAdd(exercise)}
+        disabled={alreadyAdded}
+        className="ml-2 shrink-0"
+      >
+        <Plus className="h-4 w-4" />
+        {alreadyAdded ? "Added" : "Add"}
+      </Button>
+    </div>
+  );
 }
 
 export function ExercisePicker({
@@ -71,11 +125,12 @@ export function ExercisePicker({
           search: debouncedQuery,
           limit: "20",
         });
-        const data = await api.fetch<{ data: Exercise[] }>(
-          `/exercises?${params.toString()}`
+        const data = await api.fetch<Exercise[] | { data: Exercise[] }>(
+          `/admin/exercises?${params.toString()}`
         );
         if (!cancelled) {
-          setSearchResults(data.data ?? []);
+          const exercises = Array.isArray(data) ? data : (data.data ?? []);
+          setSearchResults(exercises);
         }
       } catch {
         if (!cancelled) {
@@ -200,33 +255,22 @@ export function ExercisePicker({
             ) : (
               searchResults.map((exercise) => {
                 const alreadyAdded = selectedIds.has(exercise.id);
+                const thumb =
+                  exercise.thumbnail_url ||
+                  getCloudinaryThumbnail(
+                    exercise.video_urls?.mp4 ||
+                      exercise.video_urls?.webm ||
+                      exercise.external_video_url,
+                    { width: 80, height: 60 }
+                  );
                 return (
-                  <div
+                  <ExerciseSearchItem
                     key={exercise.id}
-                    className="flex items-center justify-between border-b px-3 py-2 last:border-b-0"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {exercise.name}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {exercise.category}
-                        {exercise.primary_muscles.length > 0 &&
-                          ` - ${exercise.primary_muscles.join(", ")}`}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleAdd(exercise)}
-                      disabled={alreadyAdded}
-                      className="ml-2 shrink-0"
-                    >
-                      <Plus className="h-4 w-4" />
-                      {alreadyAdded ? "Added" : "Add"}
-                    </Button>
-                  </div>
+                    exercise={exercise}
+                    thumb={thumb}
+                    alreadyAdded={alreadyAdded}
+                    onAdd={handleAdd}
+                  />
                 );
               })
             )}

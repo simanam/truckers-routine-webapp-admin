@@ -1,12 +1,13 @@
 "use client";
 
-import Image from "next/image";
+import { useState } from "react";
 import { Dumbbell, Copy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { Exercise } from "@/lib/types";
+import { getCloudinaryThumbnail } from "@/lib/cloudinary";
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -14,11 +15,21 @@ interface ExerciseCardProps {
 }
 
 export function ExerciseCard({ exercise, onClick }: ExerciseCardProps) {
+  const [imgError, setImgError] = useState(false);
+
   const handleCopyId = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(exercise.id);
     toast("ID copied");
   };
+
+  const thumbnailUrl =
+    exercise.thumbnail_url ||
+    getCloudinaryThumbnail(
+      exercise.video_urls?.mp4 ||
+        exercise.video_urls?.webm ||
+        exercise.external_video_url
+    );
 
   return (
     <Card
@@ -28,13 +39,13 @@ export function ExerciseCard({ exercise, onClick }: ExerciseCardProps) {
       <CardContent className="relative space-y-3 p-4">
         {/* Thumbnail */}
         <div className="flex h-36 items-center justify-center overflow-hidden rounded-md bg-muted">
-          {exercise.thumbnail_url ? (
-            <Image
-              src={exercise.thumbnail_url}
+          {thumbnailUrl && !imgError ? (
+            <img
+              src={thumbnailUrl}
               alt={exercise.name}
-              width={320}
-              height={144}
               className="h-full w-full object-cover"
+              loading="lazy"
+              onError={() => setImgError(true)}
             />
           ) : (
             <Dumbbell className="h-10 w-10 text-muted-foreground" />

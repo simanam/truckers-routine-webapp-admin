@@ -65,8 +65,9 @@ admin-app/
 │   └── settings/
 │       └── page.tsx            # App settings
 ├── lib/
-│   ├── api.ts                  # API client with auth interceptor
+│   ├── api.ts                  # API client with auth interceptor + session expiry events
 │   ├── auth.ts                 # Auth state + token management
+│   ├── cloudinary.ts           # Cloudinary video → thumbnail URL helper
 │   └── types.ts                # TypeScript types from API schemas
 ├── components/
 │   ├── layout/
@@ -478,6 +479,7 @@ User management and admin role assignment.
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
+| GET | `/admin/users/search` | admin | Search/list all users (paginated) |
 | GET | `/admin/users/admins` | admin | List all admins |
 | POST | `/admin/users/{id}/promote` | super_admin | Promote to admin |
 | POST | `/admin/users/{id}/demote` | super_admin | Demote to user |
@@ -485,6 +487,20 @@ User management and admin role assignment.
 | GET | `/admin/users/soft-deleted` | admin | List deleted users |
 | DELETE | `/admin/users/hard-delete/{id}?confirm=true` | admin | Permanent delete |
 | POST | `/admin/users/restore/{id}` | admin | Restore deleted user |
+
+**Search Query Params:** `email` (partial match), `role` (user/admin/super_admin), `limit` (default 20), `offset`
+
+**Search Response:**
+```json
+{
+  "users": [
+    { "id": "uuid", "email": "user@example.com", "role": "user", "tier": "free", "created_at": "...", "updated_at": "..." }
+  ],
+  "total": 100,
+  "limit": 20,
+  "offset": 0
+}
+```
 
 **Promote/Demote Response:**
 ```json
@@ -560,11 +576,11 @@ Motivational quotes shown in the app.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/admin/quotes/quotes` | List quotes |
-| POST | `/admin/quotes/quotes` | Create quote |
-| PATCH | `/admin/quotes/quotes/{id}` | Update quote |
-| DELETE | `/admin/quotes/quotes/{id}` | Soft delete quote |
-| GET | `/admin/quotes/quotes/categories` | List categories |
+| GET | `/admin/quotes` | List quotes |
+| POST | `/admin/quotes` | Create quote |
+| PATCH | `/admin/quotes/{id}` | Update quote |
+| DELETE | `/admin/quotes/{id}` | Soft delete quote |
+| GET | `/admin/quotes/categories` | List categories |
 
 **Create Body:**
 ```json
@@ -646,8 +662,8 @@ Dashboard
 │   ├── Daily Generation   (trigger + monitor)
 │   └── Alternatives       (exercise swaps)
 ├── Users
-│   ├── User Management    (delete/restore)
-│   ├── Admin Roles        (promote/demote)
+│   ├── User Management    (search all users, promote/demote, delete/restore)
+│   ├── Admin Roles        (promote/demote, transfer super admin)
 │   └── Corporate          (corporate accounts)
 ├── Settings
 │   ├── Pricing            (subscription pricing)

@@ -49,7 +49,7 @@ export function useUpdatePricing(plan: string) {
   return useMutation({
     mutationFn: (data: Partial<PricingConfig>) =>
       api.fetch<PricingConfig>(`/admin/pricing/${plan}`, {
-        method: "PUT",
+        method: "PATCH",
         body: JSON.stringify(data),
       }),
     onSuccess: () => {

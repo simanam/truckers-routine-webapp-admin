@@ -5,12 +5,16 @@ import type {
   PromoteDemoteResponse,
   TransferSuperAdminResponse,
   SoftDeletedUser,
+  SearchUser,
+  SearchUsersParams,
 } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // Query key factory
 // ---------------------------------------------------------------------------
 export const userKeys = {
+  all: ["users"] as const,
+  search: (params: SearchUsersParams) => ["users", "search", params] as const,
   admins: ["admins"] as const,
   softDeleted: ["soft-deleted-users"] as const,
 };
@@ -18,18 +22,45 @@ export const userKeys = {
 // ---------------------------------------------------------------------------
 // Helpers – response normalization
 // ---------------------------------------------------------------------------
-/** Extract array from paginated wrapper or return as-is if already an array */
 function toArray<T>(data: unknown): T[] {
   if (Array.isArray(data)) return data;
-  if (data && typeof data === "object" && "data" in data && Array.isArray((data as { data: unknown }).data)) {
-    return (data as { data: T[] }).data;
+  if (data && typeof data === "object") {
+    const obj = data as Record<string, unknown>;
+    // Handle wrapped responses like { users: [...] }, { data: [...] }, etc.
+    for (const key of ["data", "users", "items", "results"]) {
+      if (key in obj && Array.isArray(obj[key])) {
+        return obj[key] as T[];
+      }
+    }
   }
   return [];
+}
+
+function buildQuery(params: Record<string, unknown>): string {
+  const parts: string[] = [];
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === "") continue;
+    parts.push(
+      `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+    );
+  }
+  return parts.length ? `?${parts.join("&")}` : "";
 }
 
 // ---------------------------------------------------------------------------
 // Queries
 // ---------------------------------------------------------------------------
+export function useSearchUsers(params: SearchUsersParams = {}) {
+  return useQuery({
+    queryKey: userKeys.search(params),
+    queryFn: () =>
+      api.fetch<SearchUser[]>(
+        `/admin/users/search${buildQuery(params as Record<string, unknown>)}`
+      ),
+    select: (data) => toArray<SearchUser>(data),
+  });
+}
+
 export function useAdmins() {
   return useQuery({
     queryKey: userKeys.admins,
@@ -53,12 +84,12 @@ export function useSoftDeletedUsers() {
 export function usePromoteUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { email: string }) =>
-      api.fetch<PromoteDemoteResponse>("/admin/users/promote", {
+    mutationFn: (userId: string) =>
+      api.fetch<PromoteDemoteResponse>(`/admin/users/${userId}/promote`, {
         method: "POST",
-        body: JSON.stringify(data),
       }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
       queryClient.invalidateQueries({ queryKey: userKeys.admins });
     },
   });
@@ -67,12 +98,12 @@ export function usePromoteUser() {
 export function useDemoteUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { email: string }) =>
-      api.fetch<PromoteDemoteResponse>("/admin/users/demote", {
+    mutationFn: (userId: string) =>
+      api.fetch<PromoteDemoteResponse>(`/admin/users/${userId}/demote`, {
         method: "POST",
-        body: JSON.stringify(data),
       }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
       queryClient.invalidateQueries({ queryKey: userKeys.admins });
     },
   });
@@ -81,15 +112,13 @@ export function useDemoteUser() {
 export function useTransferSuperAdmin() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { new_super_admin_email: string }) =>
+    mutationFn: (userId: string) =>
       api.fetch<TransferSuperAdminResponse>(
-        "/admin/users/transfer-super-admin",
-        {
-          method: "POST",
-          body: JSON.stringify(data),
-        }
+        `/admin/users/transfer-super-admin/${userId}`,
+        { method: "POST" }
       ),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
       queryClient.invalidateQueries({ queryKey: userKeys.admins });
     },
   });
@@ -99,12 +128,12 @@ export function useHardDeleteUser() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) =>
-      api.fetch<void>(`/admin/users/${id}/hard-delete`, {
+      api.fetch<void>(`/admin/users/hard-delete/${id}?confirm=true`, {
         method: "DELETE",
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.softDeleted });
-      queryClient.invalidateQueries({ queryKey: userKeys.admins });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
   });
 }
@@ -113,12 +142,12 @@ export function useRestoreUser() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) =>
-      api.fetch<{ message: string }>(`/admin/users/${id}/restore`, {
+      api.fetch<{ message: string }>(`/admin/users/restore/${id}`, {
         method: "POST",
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.softDeleted });
-      queryClient.invalidateQueries({ queryKey: userKeys.admins });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
   });
 }

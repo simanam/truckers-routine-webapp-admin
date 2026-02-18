@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { Search, Copy, Dumbbell } from "lucide-react";
 import { toast } from "sonner";
 
+import { getCloudinaryThumbnail } from "@/lib/cloudinary";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -190,6 +191,52 @@ export default function ExercisesPage() {
               </SheetHeader>
 
               <div className="space-y-5 px-4 pb-6">
+                {/* Video / Thumbnail */}
+                {(() => {
+                  const videoSrc =
+                    selected.video_urls?.mp4 ||
+                    selected.video_urls?.webm ||
+                    selected.external_video_url;
+                  const posterUrl =
+                    selected.thumbnail_url ||
+                    getCloudinaryThumbnail(videoSrc, {
+                      width: 500,
+                      height: 400,
+                    });
+
+                  if (videoSrc) {
+                    return (
+                      <div className="overflow-hidden rounded-md bg-muted">
+                        <video
+                          key={selected.id}
+                          src={videoSrc}
+                          poster={posterUrl || undefined}
+                          controls
+                          loop
+                          muted
+                          autoPlay
+                          playsInline
+                          className="w-full"
+                        />
+                      </div>
+                    );
+                  }
+
+                  if (posterUrl) {
+                    return (
+                      <div className="overflow-hidden rounded-md bg-muted">
+                        <img
+                          src={posterUrl}
+                          alt={selected.name}
+                          className="w-full object-cover"
+                        />
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })()}
+
                 {/* Meta */}
                 <div className="flex flex-wrap gap-2">
                   <Badge>{selected.category}</Badge>

@@ -165,7 +165,7 @@
 
 | # | Task | File | Status |
 |---|------|------|--------|
-| 5.4 | User management (soft-deleted) | `app/(dashboard)/users/page.tsx` | ✅ |
+| 5.4 | User management (all users + deleted) | `app/(dashboard)/users/page.tsx` | ✅ |
 | 5.5 | Admin roles (promote/demote) | `app/(dashboard)/users/admins/page.tsx` | ✅ |
 
 ### Corporate
