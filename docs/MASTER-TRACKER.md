@@ -13,8 +13,8 @@
 | 3 | [Reusable Components & Hooks](#phase-3-reusable-components--hooks) | Complete | 16 | ██████████ 100% |
 | 4 | [Content Pages](#phase-4-content-pages) | Complete | 17 | ██████████ 100% |
 | 5 | [Workouts & Users](#phase-5-workouts--users) | Complete | 7 | ██████████ 100% |
-| 6 | [Settings](#phase-6-settings) | Not Started | 3 | ░░░░░░░░░░ 0% |
-| — | **Total** | — | **63** | █████████░ **95%** |
+| 6 | [Settings](#phase-6-settings) | Complete | 3 | ██████████ 100% |
+| — | **Total** | — | **63** | ██████████ **100%** |
 
 ---
 
@@ -185,9 +185,9 @@
 
 | # | Task | File | Status |
 |---|------|------|--------|
-| 6.1 | Pricing configuration | `app/(dashboard)/pricing/page.tsx` | ⬜ |
-| 6.2 | Help center (categories + articles) | `app/(dashboard)/help-center/page.tsx` | ⬜ |
-| 6.3 | API key management | `app/(dashboard)/api-keys/page.tsx` | ⬜ |
+| 6.1 | Pricing configuration | `app/(dashboard)/pricing/page.tsx` | ✅ |
+| 6.2 | Help center (categories + articles) | `app/(dashboard)/help-center/page.tsx` | ✅ |
+| 6.3 | API key management | `app/(dashboard)/api-keys/page.tsx` | ✅ |
 
 **Verify:** Pricing updates save, help center two-panel works, API key shown once on creation.
 
@@ -198,7 +198,7 @@
 | # | Check | Status |
 |---|-------|--------|
 | F.1 | `npm run build` — no build errors | ⬜ |
-| F.2 | `npx tsc --noEmit` — no TypeScript errors | ⬜ |
+| F.2 | `npx tsc --noEmit` — no TypeScript errors | ✅ |
 | F.3 | `npm run lint` — no ESLint errors | ⬜ |
 | F.4 | Login → Dashboard → all pages navigable | ⬜ |
 | F.5 | Session persists on refresh | ⬜ |
