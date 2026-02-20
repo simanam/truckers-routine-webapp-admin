@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Pencil, Trash, Check, X, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -88,9 +87,7 @@ function CategoryDialog({
 }) {
   const isEdit = !!category;
   const createMutation = useCreateHelpCategory();
-  const updateMutation = isEdit
-    ? useUpdateHelpCategory(category!.id)
-    : null;
+  const updateMutation = useUpdateHelpCategory(category?.id ?? "");
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
@@ -102,10 +99,10 @@ function CategoryDialog({
   });
 
   const isPending =
-    createMutation.isPending || (updateMutation?.isPending ?? false);
+    createMutation.isPending || updateMutation.isPending;
 
   const onSubmit = (values: CategoryFormValues) => {
-    if (isEdit && updateMutation) {
+    if (isEdit) {
       updateMutation.mutate(values, {
         onSuccess: () => {
           toast.success("Category updated");
@@ -126,7 +123,6 @@ function CategoryDialog({
   };
 
   // Auto-generate slug from name
-  const watchName = form.watch("name");
   const handleNameChange = (value: string) => {
     form.setValue("name", value);
     if (!isEdit) {
@@ -243,7 +239,7 @@ function ArticleDialog({
 }) {
   const isEdit = !!article;
   const createMutation = useCreateHelpArticle();
-  const updateMutation = isEdit ? useUpdateHelpArticle(article!.id) : null;
+  const updateMutation = useUpdateHelpArticle(article?.id ?? "");
 
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleSchema),
@@ -257,10 +253,10 @@ function ArticleDialog({
   });
 
   const isPending =
-    createMutation.isPending || (updateMutation?.isPending ?? false);
+    createMutation.isPending || updateMutation.isPending;
 
   const onSubmit = (values: ArticleFormValues) => {
-    if (isEdit && updateMutation) {
+    if (isEdit) {
       updateMutation.mutate(values, {
         onSuccess: () => {
           toast.success("Article updated");

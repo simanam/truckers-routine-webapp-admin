@@ -60,7 +60,6 @@ import type {
   Quote,
   QuoteType,
   QuoteCategory,
-  MentalState,
 } from "@/lib/types";
 
 // ---------------------------------------------------------------------------

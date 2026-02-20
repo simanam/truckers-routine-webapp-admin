@@ -50,7 +50,7 @@ import {
   useDeleteTipTemplate,
 } from "@/lib/hooks/use-tips";
 import { TIP_CATEGORY_OPTIONS } from "@/lib/constants";
-import type { TipTemplate, TipCategory } from "@/lib/types";
+import type { TipTemplate } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // Schema

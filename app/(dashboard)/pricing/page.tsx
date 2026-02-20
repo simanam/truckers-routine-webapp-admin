@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,11 +38,6 @@ function PriceInput({
   const [value, setValue] = useState<string>(String(initialValue ?? 0));
   const [isDirty, setIsDirty] = useState(false);
   const updatePricing = useUpdatePricing(plan);
-
-  useEffect(() => {
-    setValue(String(initialValue ?? 0));
-    setIsDirty(false);
-  }, [initialValue]);
 
   const handleSave = () => {
     const numVal = parseFloat(value);
@@ -152,6 +147,7 @@ function PlanCard({ plan }: { plan: PricingConfig }) {
               </p>
             ) : isEnterprise ? (
               <PriceInput
+                key={`${plan.plan}-monthly-${plan.price_monthly}`}
                 plan={plan.plan}
                 field="price_monthly"
                 label="Per Seat"
@@ -161,6 +157,7 @@ function PlanCard({ plan }: { plan: PricingConfig }) {
             ) : (
               <>
                 <PriceInput
+                  key={`${plan.plan}-monthly-${plan.price_monthly}`}
                   plan={plan.plan}
                   field="price_monthly"
                   label="Monthly"
@@ -168,6 +165,7 @@ function PlanCard({ plan }: { plan: PricingConfig }) {
                   suffix="/month"
                 />
                 <PriceInput
+                  key={`${plan.plan}-yearly-${plan.price_yearly}`}
                   plan={plan.plan}
                   field="price_yearly"
                   label="Yearly"

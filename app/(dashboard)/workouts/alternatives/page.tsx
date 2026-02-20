@@ -51,7 +51,7 @@ import {
   useBulkCreateAlternatives,
 } from "@/lib/hooks/use-workouts";
 import { useExercises } from "@/lib/hooks/use-exercises";
-import type { ExerciseAlternative, AlternativeCreateRequest, Exercise } from "@/lib/types";
+import type { ExerciseAlternative, AlternativeCreateRequest } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -446,7 +446,7 @@ export default function AlternativesPage() {
         (a.reason || "").toLowerCase().includes(lower)
       );
     });
-  }, [alternatives, search]);
+  }, [alternatives, search, exerciseMap]);
 
   const paginatedData = useMemo(() => {
     const start = (page - 1) * pageSize;

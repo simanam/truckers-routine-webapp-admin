@@ -66,13 +66,6 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   const [localSearch, setLocalSearch] = useState(searchValue ?? "");
 
-  // Sync external searchValue changes
-  useEffect(() => {
-    if (searchValue !== undefined) {
-      setLocalSearch(searchValue);
-    }
-  }, [searchValue]);
-
   // Debounced search
   useEffect(() => {
     if (!onSearchChange) return;
