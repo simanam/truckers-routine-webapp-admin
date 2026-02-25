@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { getCloudinaryThumbnail } from "@/lib/cloudinary";
+import { ExerciseBrowserDialog } from "@/components/exercise-browser-dialog";
 import type { Exercise, ExerciseType } from "@/lib/types";
 
 export interface SelectedExercise {
@@ -100,6 +101,7 @@ export function ExercisePicker({
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Exercise[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [browseOpen, setBrowseOpen] = useState(false);
 
   // Debounce search input
   useEffect(() => {
@@ -233,14 +235,25 @@ export function ExercisePicker({
       {/* Search Section */}
       <div className="space-y-3">
         <Label className="text-sm font-medium">Search Exercises</Label>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by exercise name..."
-            className="pl-9"
-          />
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by exercise name..."
+              className="pl-9"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setBrowseOpen(true)}
+          >
+            <Dumbbell className="mr-1.5 h-4 w-4" />
+            Browse All
+          </Button>
         </div>
 
         {/* Search Results */}
@@ -467,6 +480,14 @@ export function ExercisePicker({
           </span>
         </div>
       )}
+
+      {/* Exercise Browser Dialog */}
+      <ExerciseBrowserDialog
+        open={browseOpen}
+        onOpenChange={setBrowseOpen}
+        selectedIds={selectedIds}
+        onAdd={handleAdd}
+      />
     </div>
   );
 }

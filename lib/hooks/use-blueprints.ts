@@ -36,13 +36,25 @@ function buildQuery(params: Record<string, unknown>): string {
 // ---------------------------------------------------------------------------
 // Queries
 // ---------------------------------------------------------------------------
-/** Normalize response to PaginatedResponse shape */
-function toPaginated<T>(data: unknown): PaginatedResponse<T> {
-  if (Array.isArray(data)) {
-    return { data, total: data.length, page: 1, pageSize: data.length, totalPages: 1 };
+/** Normalize response to PaginatedResponse shape.
+ *  The API returns the array under a "blueprints" key, not "data". */
+function toPaginated<T>(raw: unknown): PaginatedResponse<T> {
+  if (Array.isArray(raw)) {
+    return { data: raw, total: raw.length, page: 1, pageSize: raw.length, totalPages: 1 };
   }
-  if (data && typeof data === "object" && "data" in data && Array.isArray((data as { data: unknown }).data)) {
-    return data as PaginatedResponse<T>;
+  if (raw && typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    // Support both { data: [...] } and { blueprints: [...] }
+    const items = (Array.isArray(obj.data) ? obj.data : Array.isArray(obj.blueprints) ? obj.blueprints : null) as T[] | null;
+    if (items) {
+      return {
+        data: items,
+        total: typeof obj.total === "number" ? obj.total : items.length,
+        page: typeof obj.page === "number" ? obj.page : 1,
+        pageSize: typeof obj.pageSize === "number" ? obj.pageSize : items.length,
+        totalPages: typeof obj.totalPages === "number" ? obj.totalPages : 1,
+      };
+    }
   }
   return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
 }

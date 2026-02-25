@@ -107,6 +107,7 @@ export interface BlueprintFormProps {
 export function BlueprintForm({ mode, blueprint }: BlueprintFormProps) {
   const router = useRouter();
   const slugManuallyEdited = useRef(false);
+  const durationManuallyEdited = useRef(false);
 
   // Mutations
   const createMutation = useCreateBlueprint();
@@ -211,6 +212,13 @@ export function BlueprintForm({ mode, blueprint }: BlueprintFormProps) {
       return sum + exerciseDuration + ex.restAfterSeconds;
     }, 0);
   }, [selectedExercises]);
+
+  // Auto-sync estimatedSecondsPerRound from calculated duration
+  useEffect(() => {
+    if (!durationManuallyEdited.current && calculatedDuration > 0) {
+      setValue("estimatedSecondsPerRound", calculatedDuration);
+    }
+  }, [calculatedDuration, setValue]);
 
   // Submit handler
   const onSubmit = (values: BlueprintFormValues) => {
@@ -509,12 +517,22 @@ export function BlueprintForm({ mode, blueprint }: BlueprintFormProps) {
               min={1}
               {...register("estimatedSecondsPerRound", {
                 valueAsNumber: true,
+                onChange: () => {
+                  durationManuallyEdited.current = true;
+                },
               })}
             />
             {calculatedDuration > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Calculated from exercises: {calculatedDuration}s
-              </p>
+              <button
+                type="button"
+                className="text-xs text-muted-foreground hover:text-foreground hover:underline cursor-pointer"
+                onClick={() => {
+                  durationManuallyEdited.current = false;
+                  setValue("estimatedSecondsPerRound", calculatedDuration);
+                }}
+              >
+                Use calculated: {calculatedDuration}s
+              </button>
             )}
             {errors.estimatedSecondsPerRound && (
               <p className="text-sm text-destructive">
