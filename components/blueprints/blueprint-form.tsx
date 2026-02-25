@@ -118,7 +118,7 @@ export function BlueprintForm({ mode, blueprint }: BlueprintFormProps) {
     if (!blueprint?.exercises) return [];
     return blueprint.exercises.map((ex) => ({
       exerciseId: ex.exerciseId,
-      exercise: {
+      exercise: ex.exercise ?? ({
         id: ex.exerciseId,
         name: ex.exerciseId,
         category: "",
@@ -132,7 +132,7 @@ export function BlueprintForm({ mode, blueprint }: BlueprintFormProps) {
         external_video_url: null,
         thumbnail_url: null,
         video_urls: null,
-      } as Exercise,
+      } as Exercise),
       order: ex.order,
       type: ex.type,
       durationSeconds: ex.durationSeconds,

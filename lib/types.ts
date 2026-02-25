@@ -73,6 +73,7 @@ export interface BlueprintExercise {
   durationSeconds?: number;
   reps?: number;
   restAfterSeconds: number;
+  exercise?: Exercise;
 }
 
 export interface Blueprint {
