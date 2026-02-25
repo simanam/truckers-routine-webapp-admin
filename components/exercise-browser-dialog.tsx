@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -175,8 +174,8 @@ export function ExerciseBrowserDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85vh] flex-col sm:max-w-4xl">
-        <DialogHeader>
+      <DialogContent className="flex! max-h-[85vh] flex-col sm:max-w-4xl">
+        <DialogHeader className="shrink-0">
           <DialogTitle>Browse Exercises</DialogTitle>
           <DialogDescription>
             Search and filter the exercise library. Click Add to include an
@@ -185,7 +184,7 @@ export function ExerciseBrowserDialog({
         </DialogHeader>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex shrink-0 flex-wrap items-center gap-3">
           <div className="relative w-full sm:w-60">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -238,7 +237,7 @@ export function ExerciseBrowserDialog({
         </div>
 
         {/* Results grid */}
-        <ScrollArea className="min-h-0 flex-1">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="grid gap-3 p-1 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -273,7 +272,7 @@ export function ExerciseBrowserDialog({
               <p className="text-xs">Try adjusting your filters.</p>
             </div>
           )}
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
