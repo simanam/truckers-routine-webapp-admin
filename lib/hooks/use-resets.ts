@@ -31,11 +31,13 @@ function buildQuery(params: Record<string, unknown>): string {
 // ---------------------------------------------------------------------------
 // Helpers – response normalization
 // ---------------------------------------------------------------------------
-/** Extract array from paginated wrapper or return as-is if already an array */
+/** Extract array from response wrapper (supports { data: [...] } and { resets: [...] }) */
 function toArray<T>(data: unknown): T[] {
   if (Array.isArray(data)) return data;
-  if (data && typeof data === "object" && "data" in data && Array.isArray((data as { data: unknown }).data)) {
-    return (data as { data: T[] }).data;
+  if (data && typeof data === "object") {
+    const obj = data as Record<string, unknown>;
+    if (Array.isArray(obj.data)) return obj.data as T[];
+    if (Array.isArray(obj.resets)) return obj.resets as T[];
   }
   return [];
 }
