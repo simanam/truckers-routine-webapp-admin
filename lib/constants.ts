@@ -123,6 +123,8 @@ export const API_KEY_SCOPE_OPTIONS = [
   { value: "exercises:read", label: "Exercises (Read)" },
   { value: "blueprints:read", label: "Blueprints (Read)" },
   { value: "blueprints:write", label: "Blueprints (Write)" },
+  { value: "resets:read", label: "Preset Resets (Read)" },
+  { value: "resets:write", label: "Preset Resets (Write)" },
   { value: "workouts:read", label: "Workouts (Read)" },
   { value: "workouts:write", label: "Workouts (Write)" },
   { value: "users:read", label: "Users (Read)" },
